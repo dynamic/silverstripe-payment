@@ -271,15 +271,18 @@ class Payment_Controller extends Page_Controller{
 	}	
 	
 	function success(){
-		if($payment = $this->){
-		
+		if($payment = $this->payment()){
+			$payment->Status = "Success";
+			$payment->write();
+			$this->redirect();
+			return;
 		}
 	}
 	
 	function failure(){
 		if($payment = $this->payment()){
 			$payment->Status = "Failure";
-			
+			$payment->write();
 			$this->redirect();
 			return;
 		}
@@ -287,7 +290,7 @@ class Payment_Controller extends Page_Controller{
 	
 	function redirect(){
 		if($payment = $this->Payment()){
-			
+			Director::redirect('home');
 		}else{
 			Director::redirect('home');
 		}
