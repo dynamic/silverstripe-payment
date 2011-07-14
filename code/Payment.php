@@ -3,10 +3,6 @@
  * "Abstract" class for a number of different payment
  * types allowing a user to pay for something on a site.
  *
- * @see DPSPayment
- * @see WorldPayPayment
- * @see ChequePayment
- *
  * This can't be an abstract class because sapphire doesn't
  * support abstract DataObject classes.
  * 
@@ -265,6 +261,40 @@ class Payment extends DataObject {
 		return DataObject::get_by_id($this->PaidForClass, $this->PaidForID);
 	}	
 }
+
+class Payment_Controller extends Page_Controller{
+	
+	static $URLSegment = "paymentcontrol";
+	
+	function payment(){
+		return null;
+	}	
+	
+	function success(){
+		if($payment = $this->){
+		
+		}
+	}
+	
+	function failure(){
+		if($payment = $this->payment()){
+			$payment->Status = "Failure";
+			
+			$this->redirect();
+			return;
+		}
+	}
+	
+	function redirect(){
+		if($payment = $this->Payment()){
+			
+		}else{
+			Director::redirect('home');
+		}
+	}
+
+}
+
 abstract class Payment_Result {
 	
 	protected $value;
@@ -314,4 +344,3 @@ class Payment_Failure extends Payment_Result {
 		return false;
 	}
 }
-?>

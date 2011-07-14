@@ -21,7 +21,7 @@ class ChequePayment extends Payment {
 	function getPaymentFormFields() {
 		return new FieldSet(
 			// retrieve cheque content from the ChequeContent() method on this class
-			new LiteralField("Chequeblurb", '<div id="Cheque" class="typography">' . $this->ChequeContent() . '</div>'),
+			new LiteralField("Chequeblurb", '<div id="Cheque" class="typography">' . _t('ChequePayment.CONTENT','Please note: Your goods will not be dispatched until we receive your payment.'); . '</div>'),
 			new HiddenField("Cheque", "Cheque", 0)
 		);
 	}
@@ -34,11 +34,7 @@ class ChequePayment extends Payment {
 	 * Returns the Cheque content from the CheckoutPage
 	 */
 	function ChequeContent() {
-		if(class_exists('CheckoutPage')) {
-			return DataObject::get_one('CheckoutPage')->ChequeMessage;
-		}
+		return _t('ChequePayment.CONTENT','Please note: Your goods will not be dispatched until we receive your payment.');
 	}
 	
 }
-
-?>

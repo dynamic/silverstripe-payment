@@ -45,7 +45,6 @@ class Harness extends Page_Controller{
 		return $title;
 	}
 	
-	
 	function LeftContent(){
 		// get all Payment subclasses
 		$payments = self::$stand_alone_payments;
@@ -202,4 +201,3 @@ class Harness extends Page_Controller{
 		}
 	}
 }
-?>
