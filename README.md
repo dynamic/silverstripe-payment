@@ -20,6 +20,3 @@
 ## Usage Overview
 
 Pay for items with various payment gateway solutions.
-
-## Known issues
-
