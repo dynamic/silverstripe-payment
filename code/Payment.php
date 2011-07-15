@@ -38,6 +38,15 @@ class Payment extends DataObject {
 		'PaidBy' => 'Member',
 	);
 	
+	public static $summary_fields = array(
+		'ID' => 'PaymentID',
+		'Created' => 'Date',
+		'Amount.Amount' => 'Amount',
+		'PaymentMethod' => 'Method',
+		'Status' => 'Status',
+		'Message' => 'Message'
+	);
+	
 	/**
 	 * Instances of Payment supported (usable) on this site.
 	 * @var array
@@ -81,6 +90,14 @@ class Payment extends DataObject {
 		return self::$site_currency;
 	}
 	
+	
+	/**
+	 * Gets the array of default supported methods.
+	 */
+	public static function get_supported_methods(){
+		return self::$supported_methods;
+	}
+	
 	/**
 	 * Set the payment types that this site supports.
 	 * The classes should all be subclasses of Payment.
@@ -96,6 +113,17 @@ class Payment extends DataObject {
 		
 		$this->Amount->Currency = Payment::site_currency();
 		$this->setClientIP();
+ 	}
+ 	
+ 	/**
+ 	 * Set the payment amount.
+ 	 * Reduces need to enter Amount->Currency.
+ 	 * Maintains some backwards compatability wiht SilverStripe 2.3
+ 	 */
+ 	function setAmount($amount,$currency = null){
+ 		$cur = ($currency) ? $currency : self::$site_currency;
+ 		$this->Amount->Amount = $amount;
+ 		$this->Amount->Currency = $cur; 		
  	}
 	
 	/**
@@ -128,6 +156,7 @@ class Payment extends DataObject {
 		if(isset(self::$supported_methods[$this->ClassName])) {
 			return self::$supported_methods[$this->ClassName];
 		}
+		return $this->class;
 	}
 	
 	/**
@@ -259,7 +288,15 @@ class Payment extends DataObject {
 	
 	function PaidObject(){
 		return DataObject::get_by_id($this->PaidForClass, $this->PaidForID);
-	}	
+	}
+	
+	function setPaidObject($obj){
+		if($obj instanceof DataObject && $obj->ID){
+			$this->PaidForID = $obj->ID;
+			$this->PaidForClass = $obj->class;
+		}
+	}
+
 }
 
 class Payment_Controller extends Page_Controller{

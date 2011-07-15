@@ -20,7 +20,6 @@ class ChequePayment extends Payment {
 	
 	function getPaymentFormFields() {
 		return new FieldSet(
-			// retrieve cheque content from the ChequeContent() method on this class
 			new LiteralField("Chequeblurb",  _t('ChequePayment.CONTENT','Please note: Your goods will not be dispatched until we receive your payment.')),
 			new HiddenField("Cheque", "Cheque", 0)
 		);
@@ -28,13 +27,6 @@ class ChequePayment extends Payment {
 	
 	function getPaymentFormRequirements() {
 		return null;
-	}
-
-	/**
-	 * Returns the Cheque content from the CheckoutPage
-	 */
-	function ChequeContent() {
-		return _t('ChequePayment.CONTENT','Please note: Your goods will not be dispatched until we receive your payment.');
 	}
 	
 }
