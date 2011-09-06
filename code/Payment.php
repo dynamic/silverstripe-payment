@@ -115,17 +115,6 @@ class Payment extends DataObject {
 		$this->setClientIP();
  	}
 
- 	/**
- 	 * Set the payment amount.
- 	 * Reduces need to enter Amount->Currency.
- 	 * Maintains some backwards compatability wiht SilverStripe 2.3
- 	 */
- 	function setAmount($amount,$currency = null){
- 		$cur = ($currency) ? $currency : self::$site_currency;
- 		$this->Amount->Amount = $amount;
- 		$this->Amount->Currency = $cur;
- 	}
-
 	/**
 	 * Set the IP address of the user to this payment record.
 	 * This isn't perfect - IP addresses can be hidden fairly easily.
