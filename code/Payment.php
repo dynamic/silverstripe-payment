@@ -276,7 +276,9 @@ class Payment extends DataObject {
 	}
 
 	function PaidObject(){
-		return DataObject::get_by_id($this->PaidForClass, $this->PaidForID);
+		if($this->PaidForClass && $this->PaidForID)
+			return DataObject::get_by_id($this->PaidForClass, $this->PaidForID);
+		return null;
 	}
 
 	function setPaidObject($obj){
