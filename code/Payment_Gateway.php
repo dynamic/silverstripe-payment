@@ -72,30 +72,47 @@ class Payment_Gateway {
    * @return Gateway_Result
    */
   public function getResponse($response) {
-    return new Gateway_Result(Gateway_Result::FAILURE);
+    return new Gateway_Result();
   }
 }
 
 /**
  * Class for gateway results
  */
-class Gateway_Result {
-  
+abstract class Gateway_Result {
+	
   const SUCCESS = 'Success';
   const FAILURE = 'Failure';
   const INCOMPLETE = 'Incomplete';
   
-  protected $status;
+  protected $status = INCOMPLETE;
+  protected $data;
+  protected $adminmessage, $usermessage;
 
-  function __construct($status = null) {
-    if ($status == self::SUCCESS || $status == self::FAILURE || $status == self::INCOMPLETE) {
-      $this->status = $status;
-    } else {
-      user_error("Invalid result status", E_USER_ERROR);
-    }
+  /**
+   * 
+   * @param unknown_type $data - could be an array
+   */
+  function __construct($data) {
+  	$this->data = $data;
+    $this->parse();
   }
+  
+  /**
+   * Parse the stored data, and set status.
+   */
+  abstract protected function parse();
 
   function getStatus() {
     return $this->status;
   }
+  
+  function getAdminMessage(){
+  	return $this->adminmessage;
+  }
+  
+  function getUserMessage(){
+  	return $this->usermessage;
+  }
+  
 }
