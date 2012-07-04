@@ -35,7 +35,7 @@ class PaymentProcessor extends Controller {
    * If this is set to some url value, the processor will redirect 
    * to the url after a payment finishes processing.
    */
-  public $postProcessRedirect;
+  protected $postProcessRedirect = null;
   
   /**
    * Get the supported methods array set by the yaml configuraion
@@ -63,6 +63,18 @@ class PaymentProcessor extends Controller {
   public function setMethodName($method) {
     $this->methodName = $method;
   }
+  
+  public function setPostProcessRedirect($link){
+	Session::set(get_class($this).".postprocessredirect", $link);
+	$this->postProcessRedirect = $link;
+  }
+  
+  public function getPostProcessRedirect(){
+  	if($this->postProcessRedirect){
+  		return $this->postProcessRedirect;
+  	}
+	return $this->postProcessRedirect = Session::get(get_class($this).".postprocessredirect");
+  }
 
   /**
    * Process a payment request.
@@ -83,17 +95,15 @@ class PaymentProcessor extends Controller {
    * Process a payment response.
    */
   public function processresponse($response) {
+  	
+  	// Retrieve the payment object if none is referenced at this point
+  	if (! $this->payment) {
+  		$this->payment = $this->getPaymentObject($response);
+  	}
     // Get the reponse result from gateway
     $result = $this->gateway->getResponse($response);
-
-    // Retrieve the payment object if none is referenced at this point
-    if (! $this->payment) {
-      $this->payment = $this->getPaymentObject($response);
-    }
-    
     // Save gateway message
     $this->payment->Message = $result->getMessage();
-    
     // Save payment status
     switch ($result->getStatus()) {
       case PaymentGateway_Result::SUCCESS:
@@ -108,15 +118,15 @@ class PaymentProcessor extends Controller {
       default:
         break;
     }
-    
     // Do post-processing
-    $this->postProcess();
+    return $this->postProcess();
   }
 
   /**
    * Helper function to get the payment object from the gateway response
    */
   public function getPaymentObject($response) {
+    return $this->payment;
   }
 
   /**
@@ -125,19 +135,21 @@ class PaymentProcessor extends Controller {
    * render a default page to show payment result.
    */
   public function postProcess() {
-    if ($this->postProcessRedirect) {
+    if ($this->getPostProcessRedirect()) {
       // Put the payment ID in a session
       Session::set('PaymentID', $this->payment->ID);
-      Controller::curr()->redirect($this->postProcessRedirect);
+      Session::clear(get_class($this).".postprocessredirect");
+      Controller::curr()->redirect($this->getPostProcessRedirect());
+      return;
     } else {
       if ($this->payment) {
         return $this->customise(array(
           "Content" => 'Payment #' . $this->payment->ID . ' status:' . $this->payment->Status,
           "Form" => '',
         ))->renderWith("Page");
-      } else {
-        return null;
       }
+     	die('no payment found');
+      return null;
     }
   }
 
@@ -148,10 +160,8 @@ class PaymentProcessor extends Controller {
    */
   public function getDefaultFormFields() {
     $fieldList = new FieldList();
-
     $fieldList->push(new NumericField('Amount', 'Amount', ''));
     $fieldList->push(new TextField('Currency', 'Currency', 'NZD'));
-
     return $fieldList;
   }
 
@@ -172,12 +182,10 @@ class PaymentProcessor extends Controller {
    */
   public static function get_combined_form_fields() {
     $fieldList = new FieldList();
-
     // Add the default form fields
     foreach (singleton('PaymentProcessor')->getDefaultFormFields() as $field) {
       $fieldList->push($field);
     }
-
     // Custom form fields for each gateway
     foreach (self::get_supported_methods() as $methodName) {
       $controller = PaymentFactory::factory($methodName);
@@ -185,7 +193,6 @@ class PaymentProcessor extends Controller {
         $fieldList->push($field);
       }
     }
-
     return $fieldList;
   }
 }
@@ -194,18 +201,9 @@ class PaymentProcessor_MerchantHosted extends PaymentProcessor {
 
   public function processRequest($data) {
     parent::processRequest($data);
-
     // Call processResponse directly since there's no need to set return link
     $response = $this->gateway->process($data);
     return $this->processresponse($response);
-  }
-
-  public function processresponse($response) {
-    return parent::processResponse($response);
-  }
-
-  public function getPaymentObject($response) {
-    return $this->payment;
   }
 
   public function getCustomFormFields() {
@@ -214,42 +212,38 @@ class PaymentProcessor_MerchantHosted extends PaymentProcessor {
     $fieldList->push(new CreditCardField('CardNumber', 'Credit Card Number :'));
     $fieldList->push(new TextField('DateExpiry', 'Credit Card Expiry : (MMYY)', '', 4));
     $fieldList->push(new TextField('Cvc2', 'Credit Card CVN : (3 or 4 digits)', '', 4));
-
     return $fieldList;
   }
 }
 
 class PaymentProcessor_GatewayHosted extends PaymentProcessor {
 
+	static $url_handlers = array(
+		'processresponse/$MethodName/$PaymentID' => 'processresponse'
+	);
+	
   public function processRequest($data) {
     parent::processRequest($data);
-
     // Set the return link
     // TODO: Allow custom return url
-    $returnURL = Director::absoluteURL(Controller::join_links(
-        $this->link(),
-        'processresponse',
-        $this->methodName,
-        $this->payment->ID));
+    $returnURL = Director::absoluteURL(Controller::join_links($this->Link(),'processresponse',$this->methodName,$this->payment->ID));
     $this->gateway->setReturnURL($returnURL);
-
     // Send a request to the gateway
     $this->gateway->process($data);
   }
 
   public function processresponse($response) {
     // Reconstruct the gateway object
-    $this->setMethodName($response->param('ID'));
+    $this->setMethodName($response->param('MethodName'));
     $this->gateway = PaymentFactory::get_gateway($this->methodName);
-
     return parent::processresponse($response);
   }
 
   public function getPaymentObject($response) {
-    return DataObject::get_by_id('Payment', $response->param('OtherID'));
+  	if(!$this->payment){
+		$this->payment = DataObject::get_by_id('Payment', $response->param('PaymentID'));
+  	}
+  	return $this->payment;
   }
 
-  public function getCustomFormFields() {
-    return parent::getCustomFormFields();
-  }
 }
