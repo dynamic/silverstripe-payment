@@ -105,7 +105,7 @@ class PaymentProcessor extends Controller {
     $this->gateway->validatePaymentData($this->paymentData);
     
     if (! $this->gateway->validationResult->valid()) {
-      user_error('Payment data is not valid', E_USER_ERROR);
+    	user_error('Payment data is not valid: '.$this->gateway->validationResult->message(), E_USER_ERROR);
     }
   }
 
@@ -173,10 +173,14 @@ class PaymentProcessor extends Controller {
    * render a default page to show payment result.
    */
   public function postProcess() {
-    if ($this->postProcessRedirect) {
-      // Put the payment ID in a session
-      Session::set('PaymentID', $this->payment->ID);
-      Controller::curr()->redirect($this->postProcessRedirect);
+  	
+  	$postredirect = $this->postProcessRedirect;
+  	if(!$postredirect){
+		$postredirect = Session::get("PaymentPostRedirect".$this->payment->ID);
+  	}
+	if($postredirect) {
+      Session::set('PaymentID', $this->payment->ID); // Put the payment ID in a session
+      Controller::curr()->redirect($postredirect);
     } else {
       if ($this->payment) {
         return $this->customise(array(
@@ -289,6 +293,8 @@ class PaymentProcessor_GatewayHosted extends PaymentProcessor {
         $this->payment->ID));
     $this->gateway->setReturnURL($returnURL);
     $this->gateway->setCancelURL($cancelURL);
+    
+    Session::set("PaymentPostRedirect".$this->payment->ID,$this->postProcessRedirect);
 
     // Send a request to the gateway
     $this->gateway->process($this->paymentData);

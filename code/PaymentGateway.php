@@ -77,7 +77,7 @@ abstract class PaymentGateway {
    * Get the list of currencies supported by this gateway
    */
   public function getSupportedCurrencies() {
-    return array('USD');  
+		return Config::inst()->get('PaymentGateway', 'currencies');
   }
 
   /**
@@ -101,7 +101,7 @@ abstract class PaymentGateway {
       $this->validationResult->error('Payment currency not set');
     } else if (empty($data['Currency'])) {
       $this->validationResult->error('Payment currency cannot be null');
-    } else if (! in_array($data['Currency'], $this->getSupportedCurrencies())) {
+    } else if (is_array($this->getSupportedCurrencies()) &&! in_array($data['Currency'], $this->getSupportedCurrencies())) {
       $this->validationResult->error('Currency ' . $data['Currency'] . ' not supported by this gateway');
     }
   }
