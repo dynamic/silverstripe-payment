@@ -287,6 +287,32 @@ class Payment extends DataObject {
 			$this->PaidForClass = $obj->class;
 		}
 	}
+	
+	/**
+	 * After all payment handling has been completed,
+	 * this is the url to redirect to.
+	 * 
+	 * This value is stored in session, appropriate
+	 * to the current payment id.
+	 */
+	function setReturnURL($url){
+		if(!$this->ID){
+			$this->write();
+		}
+		Session::set("PaymentReturnURL".$this->ID,$url);
+	}
+	
+	/**
+	 * Get and clear return url from session.
+	 */
+	function getReturnURL(){
+		if($url = Session::get("PaymentReturnURL".$this->ID)){			
+			Session::set("PaymentReturnURL".$this->ID, null);
+			Session::clear("PaymentReturnURL".$this->ID);
+			return $url;
+		}
+		return false;
+	}
 
 }
 
@@ -318,10 +344,12 @@ class Payment_Controller extends Page_Controller{
 
 	function redirect(){
 		if($payment = $this->Payment()){
-			Director::redirect('home');
-		}else{
-			Director::redirect('home');
+			if($url = $payment->getReturnURL()){
+				$this->redirect($url);
+				return;
+			}
 		}
+		$this->redirect('home');
 	}
 
 }
