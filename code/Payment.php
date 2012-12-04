@@ -342,7 +342,7 @@ class Payment_Controller extends Page_Controller{
 		}
 	}
 
-	function redirect(){
+	function redirect($url, $code=302){
 		if($payment = $this->Payment()){
 			if($url = $payment->getReturnURL()){
 				$this->redirect($url);
