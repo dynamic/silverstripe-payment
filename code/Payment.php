@@ -107,6 +107,19 @@ class Payment extends DataObject {
 	static function set_supported_methods($methodMap) {
 		self::$supported_methods = $methodMap;
 	}
+	
+	function getCMSFields(){
+		$fields = parent::getCMSFields();
+		
+		$fields->removeFieldsFromTab("Root.Main", array(
+			'IP','ProxyIP','PaidForID','PaidForClass','ExceptionError','RecurringPaymentID','PaidByID','PaymentDate'
+		));
+
+		$fields->addFieldToTab('Root.Main', $date = new DatetimeField('Created','Date'));
+		$date->getDateField()->setConfig("showcalendar", true);		
+		
+		return $fields;
+	}
 
 	function populateDefaults() {
 		parent::populateDefaults();
