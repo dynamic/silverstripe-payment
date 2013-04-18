@@ -3,7 +3,7 @@
 	"description" : "Payment module for SilverStripe",
 	"license" : "BSD-2-Clause",
 	"type" : "silverstripe-module",
-	"keywords" : ["silverstripe""payment","ordering"],
+	"keywords" : ["silverstripe","payment","ordering"],
 	"authors" : [
 		{
 			"name" : "Jeremy Shipman",
