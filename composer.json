@@ -1,5 +1,5 @@
 {
-  "name" : "burnbright/payment",
+  "name" : "burnbright/silverstripe-payment",
 	"description" : "Payment module for SilverStripe",
 	"license" : "BSD-2-Clause",
 	"type" : "silverstripe-module",
@@ -16,5 +16,8 @@
 		"php": ">=5.3.2",
 		"silverstripe/cms": "3.1.*",
 		"silverstripe/framework": "3.1.*"
+	},
+	"extra" : {
+		"installer-name": "payment"
 	}
 }
