@@ -1,5 +1,5 @@
 {
-  "name" : "burnbright/silverstripe-payment",
+  "name" : "silverstripe/payment",
 	"description" : "Payment module for SilverStripe",
 	"license" : "BSD-2-Clause",
 	"type" : "silverstripe-module",
