@@ -1,0 +1,30 @@
+{
+    "name": "dynamic/silverstripe-payment",
+    "description": "SilverStripe payment module",
+    "type": "silverstripe-module",
+    "license": "BSD-3-Clause",
+    "keywords": [
+        "silverstripe",
+        "payment"
+    ],
+    "require": {
+        "silverstripe/cms": "^4@dev"
+    },
+    "require-dev": {
+        "phpunit/PHPUnit": "~4.8"
+    },
+    "extra": {
+        "branch-alias": {
+            "dev-master": "2.x-dev"
+        },
+        "installer-name": "payment"
+    },
+    "autoload": {
+        "psr-4": {
+            "Dynamic\\Payment\\": "code/",
+            "Dynamic\\Payment\\Tests\\": "tests/php/"
+        }
+    },
+    "minimum-stability": "dev",
+    "prefer-stable": true
+}
